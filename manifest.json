@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Chess.com Custom Sounds",
+  "version": "1.0.0",
+  "description": "Replace chess.com sounds with custom sound packs.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://www.chess.com/*",
+    "https://zesizesizesi.github.io/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.chess.com/*"],
+      "js": ["contentScript.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["pageScript.js"],
+      "matches": ["https://www.chess.com/*"]
+    }
+  ],
+  "action": {
+    "default_title": "Chess.com Custom Sounds",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

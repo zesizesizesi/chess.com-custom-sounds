@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Chess.com Custom Sounds</title>
+    <style>
+      :root {
+        --bg-light: #ffffff;
+        --bg-dark: #181818;
+        --text-light: #111827;
+        --text-dark: #f9fafb;
+        --accent: #ffffff;
+        --border-light: #bcbec2;
+        --border-dark: #3f3f3f;
+      }
+
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 10px;
+        min-width: 200px;
+        background: var(--bg-light);
+        color: var(--text-light);
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      body.dark {
+        background: var(--bg-dark);
+        color: var(--text-dark);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .icon-button {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 999px;
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      body:not(.dark) .icon-button:hover {
+        background: #f3f4f6;
+      }
+
+      body.dark .icon-button:hover {
+        background: #262626;
+      }
+
+      .card {
+        border: 1px solid var(--border-light);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      body.dark .card {
+        border-color: var(--border-dark);
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 5px 0;
+        cursor: pointer;
+      }
+
+      input[type="radio"] {
+        accent-color: var(--accent);
+      }
+
+      .hint {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1 style="font-size: 14px; margin: 0;">CHESS.COM SOUNDS</h1>
+      <button id="theme-toggle" class="icon-button" title="Toggle theme">
+        <span id="theme-icon">⚪</span>
+      </button>
+    </div>
+
+    <div class="card">
+      <label>
+        <input type="radio" name="mode" value="default">
+        Default
+      </label>
+
+      <label>
+        <input type="radio" name="mode" value="lichess">
+        Lichess
+      </label>
+
+      <label>
+        <input type="radio" name="mode" value="fast">
+        Fast
+      </label>
+
+
+
+
+      <div class="hint">
+        Changing mode takes full effect after refreshing the chess.com page.
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
