@@ -40,7 +40,6 @@
       'game-start': 'game-start.mp3',
       'game-end': 'game-end.mp3'
     },
-
     lichess: {
       'move-self': 'move.mp3',
       'move-check': 'move.mp3',
@@ -71,13 +70,9 @@
 
   function getReplacementUrl(originalUrl) {
     if (!isSoundUrl(originalUrl)) return originalUrl;
-
     const key = getKeyFromUrl(originalUrl);
     if (!key) return originalUrl;
-
-    if (currentMode === 'default') {
-      return originalUrl;
-    }
+    if (currentMode === 'default') return originalUrl;
 
     const baseUrl = BASE_URLS[currentMode];
     const packMap = PACK_FILE_MAP[currentMode];
@@ -85,7 +80,6 @@
 
     const fileName = packMap[key];
     if (!fileName) return originalUrl;
-
     if (!originalUrls[key]) originalUrls[key] = originalUrl;
 
     return `${baseUrl}/${fileName}`;
@@ -100,8 +94,7 @@
         if (!key) return;
         const original = originalUrls[key];
         if (original) el.src = original;
-      } catch (e) {
-      }
+      } catch (e) {}
     });
   }
 
@@ -129,7 +122,6 @@
           const originalResource = resource;
           const shouldTag = isSoundUrl(originalResource);
           const urlKey = shouldTag ? getKeyFromUrl(originalResource) : null;
-
           const maybeReplaced = getReplacementUrl(originalResource);
 
           return originalFetch.call(this, maybeReplaced, init).then(response => {
@@ -139,22 +131,17 @@
                 response.arrayBuffer = function () {
                   return origArrayBuffer().then(buf => {
                     try {
-                      if (buf && urlKey) {
-                        audioBufferKeyMap.set(buf, urlKey);
-                      }
-                    } catch (e) {
-                    }
+                      if (buf && urlKey) audioBufferKeyMap.set(buf, urlKey);
+                    } catch (e) {}
                     return buf;
                   });
                 };
-              } catch (e) {
-              }
+              } catch (e) {}
             }
             return response;
           });
         }
-      } catch (e) {
-      }
+      } catch (e) {}
       return originalFetch.call(this, resource, init);
     };
   })();
@@ -171,8 +158,7 @@
           this.__chess_sound_key = getKeyFromUrl(url);
           return originalOpen.call(this, method, replaced, ...rest);
         }
-      } catch (e) {
-      }
+      } catch (e) {}
       return originalOpen.call(this, method, url, ...rest);
     };
 
@@ -184,19 +170,15 @@
           this.onload = function () {
             try {
               if (this.responseType === 'arraybuffer' && this.response instanceof ArrayBuffer) {
-                try {
-                  audioBufferKeyMap.set(this.response, trackKey);
-                } catch (e) { }
+                try { audioBufferKeyMap.set(this.response, trackKey); } catch (e) {}
               }
-            } catch (e) { }
-
+            } catch (e) {}
             if (typeof origOnload === 'function') {
-              try { origOnload.apply(this, arguments); } catch (e) { }
+              try { origOnload.apply(this, arguments); } catch (e) {}
             }
           };
         }
-      } catch (e) {
-      }
+      } catch (e) {}
       return originalSend.call(this, body);
     };
   })();
@@ -209,17 +191,16 @@
     AC.prototype.decodeAudioData = function (arrayBuffer, successCallback, errorCallback) {
       try {
         const key = audioBufferKeyMap.get(arrayBuffer);
-        if (key === 'premove' && currentMode === 'lichess') {
+        if ((key === 'premove' || key === 'illegal') && currentMode === 'lichess') {
           const silent = makeSilentAudioBuffer(this);
           if (typeof successCallback === 'function') {
-            try { successCallback(silent); } catch (e) { }
+            try { successCallback(silent); } catch (e) {}
             return Promise.resolve(silent);
           } else {
             return Promise.resolve(silent);
           }
         }
-      } catch (e) {
-      }
+      } catch (e) {}
 
       try {
         return originalDecode.call(this, arrayBuffer, successCallback, errorCallback);
@@ -241,13 +222,34 @@
     HTMLMediaElement.prototype.play = function (...args) {
       try {
         if (this.src && isSoundUrl(this.src)) {
+          const key = getKeyFromUrl(this.src);
+
+          if ((key === 'premove' || key === 'illegal') && currentMode === 'lichess') {
+            try {
+              const prevMuted = this.muted;
+              this.muted = true;
+              const playPromise = originalPlay.apply(this, args);
+
+              if (playPromise && typeof playPromise.finally === 'function') {
+                playPromise.finally(() => {
+                  try { this.muted = prevMuted; } catch (e) {}
+                });
+              } else {
+                setTimeout(() => {
+                  try { this.muted = prevMuted; } catch (e) {}
+                }, 0);
+              }
+              return playPromise;
+            } catch (e) {}
+          }
+
           const newSrc = getReplacementUrl(this.src);
           if (newSrc !== this.src) {
-            try { this.src = newSrc; } catch (e) {  }
+            try { this.src = newSrc; } catch (e) {}
           }
         }
-      } catch (e) {
-      }
+      } catch (e) {}
+
       return originalPlay.apply(this, args);
     };
   })();
@@ -262,5 +264,4 @@
   try {
     console.debug('[ChessCustomSounds] pageScript injected, currentMode=', currentMode);
   } catch (e) {}
-
 })();
